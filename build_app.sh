@@ -1,5 +1,5 @@
 #!/bin/bash
-# Construit MiCONE.app, la signe et l'installe dans ~/Applications/Gfx/Icons (remplace la version précédente).
+# Construit MiCONE.app, la signe et l'installe dans ~/Applications/Home Applications (remplace la version précédente).
 # Socle est recopié depuis sa source à chaque build : socle_qt.py est toujours à jour.
 set -euo pipefail
 
@@ -10,7 +10,7 @@ VERSION="$(sed -n 's/^__version__ = "\(.*\)"/\1/p' "$ROOT/src/version.py")"
 BUILD="$(sed -n 's/^__build__ = "\(.*\)"/\1/p' "$ROOT/src/version.py")"
 SOCLE_QT="/Volumes/SKYRIM/TOOLS/DESIGN/Socle/qt/socle_qt.py"
 SIGN="/Volumes/SKYRIM/TOOLS/MAC/_tools/sign_app.sh"
-OUT="${MICONE_APPS_DIR:-$HOME/Applications/Gfx/Icons}"
+OUT="${MICONE_APPS_DIR:-$HOME/Applications/Home Applications}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/micone_build.XXXXXX")"
 export PATH="/Library/Frameworks/Python.framework/Versions/3.12/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
