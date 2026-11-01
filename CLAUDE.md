@@ -6,7 +6,7 @@ Automatic background removal (`ia.detourer_auto`): icon plate → numpy magic wa
 
 - UI: follow the Socle design system — https://claude.ai/artifact/TkNj2Y6SQGZwT6EyME92Ah
 - `src/MiCONE.py` (PyQt6 UI + `--cli`), `src/rendu.py` (engine), `src/textes.py` (languages), `src/ia.py` (AI generation: Pollinations, Hugging Face, Gemini, OpenAI; keys in the Keychain, service "MiCONE"; numpy background removal), `src/dialogue_ia.py` (chat window), `src/a_propos.py` (About window, Socle model), `src/splash.py` (animated splash, Socle rule), `src/maj.py` (automatic updates), `src/version.py` (single source of the version).
-- Build: `./build_app.sh` → installs `~/Applications/Home Applications/MiCONE.app` (Socle copied from /Volumes/SKYRIM/TOOLS/DESIGN/Socle, signed through /Volumes/SKYRIM/TOOLS/MAC/_tools/sign_app.sh). The version in Info.plist comes from `src/version.py`. The app icon (`assets/icon.*`) is produced by the app itself from `assets/motif.png`.
+- Build: `./build_app.sh` → installs `~/Applications/Applications Personnelles/MiCONE.app` (Socle copied from /Volumes/SKYRIM/TOOLS/DESIGN/Socle, signed through /Volumes/SKYRIM/TOOLS/MAC/_tools/sign_app.sh). The version in Info.plist comes from `src/version.py`. The app icon (`assets/icon.*`) is produced by the app itself from `assets/motif.png`.
 - Languages: fr, en, es, it (`src/textes.py`, same keys everywhere; no visible text hard-coded). Detected from the macOS preferred language; anything else → English. `MICONE_LANG=xx` forces a language for tests.
 - Tests: `python3 -m unittest discover tests` (texts in 4 languages, versions, release parsing, install script).
 - Brand: the lowercase "i" of the name takes the logo blue (#4090f0) wherever the name is written (`socle_qt.brand`).
