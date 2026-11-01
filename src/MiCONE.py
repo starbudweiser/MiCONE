@@ -25,7 +25,7 @@ import rendu
 import socle_qt
 from a_propos import APropos
 from dialogue_ia import DialogueIA
-from textes import t
+from textes import LANGUE, t
 
 APERCU = 400                     # côté de l'aperçu principal (points)
 PETITES = (128, 64, 32, 16)      # tailles réelles affichées sous l'aperçu
@@ -590,6 +590,7 @@ if __name__ == "__main__":
     app = Appli(sys.argv)
     socle_qt.apply(app)
     socle_qt.brand(app, "MiCONE", "#4090f0")   # la minuscule du nom prend la couleur du logo
+    socle_qt.traduire_qt(app, LANGUE)   # menu de l'appli (Masquer, Quitter, Services…) dans la langue choisie
     app.fenetre = Fenetre()
     app.fenetre.show()
     QTimer.singleShot(3000, app.fenetre.maj.verifier)   # nouvelle version ? (au plus une fois par jour)

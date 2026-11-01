@@ -11,14 +11,16 @@ Utilisation :
     socle_qt.role(label, "title")                # title | heading | display | eyebrow | meta | mono | path | muted | subtle
     socle_qt.status(label, "success")            # success | warning | danger | none (+ repolish auto)
     socle_qt.brand(app, "sKYCRASH", "#ff7a00")   # minuscule du nom de l'appli dans la couleur de son logo
+    socle_qt.traduire_qt(app, "fr")              # menus et boutons fournis par Qt dans la langue de l'appli
+    # Les fenêtres se centrent seules à leur première ouverture (apply) ; socle_qt.centrer(fenetre) pour le faire à la main.
 """
 import html
 import os
 import re
 import tempfile
 
-from PyQt6.QtGui import QColor, QFont, QFontDatabase, QPalette
-from PyQt6.QtCore import QEvent, QObject, Qt
+from PyQt6.QtGui import QColor, QCursor, QFont, QFontDatabase, QGuiApplication, QPalette
+from PyQt6.QtCore import QEvent, QLibraryInfo, QObject, Qt, QTimer, QTranslator
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QHBoxLayout, QLabel, QPushButton, QRadioButton, QSizePolicy,
                              QWidget)
 
@@ -317,6 +319,37 @@ def fit_height(window: QWidget) -> QWidget:
     return window
 
 
+def centrer(window: QWidget) -> QWidget:
+    """Centre la fenêtre sur l'écran du pointeur, dans sa zone utile (hors barre des menus et Dock)."""
+    ecran = QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()
+    zone = ecran.availableGeometry()
+    cadre = window.frameGeometry()
+    window.move(max(zone.left(), zone.center().x() - cadre.width() // 2),
+                max(zone.top(), zone.center().y() - cadre.height() // 2))
+    return window
+
+
+class _Centrage(QObject):
+    def eventFilter(self, obj, event):
+        if (event.type() == QEvent.Type.Show and isinstance(obj, QWidget) and obj.isWindow()
+                and obj.windowType() == Qt.WindowType.Window and not obj.property("socle_centre")):
+            obj.setProperty("socle_centre", True)
+            if not obj.testAttribute(Qt.WidgetAttribute.WA_Moved):  # une fenêtre placée par l'appli (splash) reste où elle est
+                centrer(obj)
+                recentrage = QTimer(obj)  # la barre de titre ne compte dans le cadre qu'une fois la fenêtre affichée
+                recentrage.setSingleShot(True)
+                recentrage.timeout.connect(lambda: centrer(obj))
+                recentrage.start(0)
+        return False
+
+
+def traduire_qt(app: QApplication, langue: str) -> None:
+    """Traduit ce que Qt écrit lui-même (menu de l'appli sur macOS, boutons standard) : à appeler avant de créer les menus."""
+    traduction = QTranslator(app)
+    if traduction.load(f"qtbase_{langue}", QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)):
+        app.installTranslator(traduction)
+
+
 # Nom de l'appli : sa lettre minuscule, à toute place (le « m » de mORTEX, le « s » de sKYCRASH, le « e » de
 # CAREERDeSK…) prend la couleur de son logo partout où le nom est écrit dans un QLabel (titres, textes,
 # dialogues, QMessageBox). Titres de fenêtre, menus et boutons natifs n'affichent pas de texte riche.
@@ -606,4 +639,7 @@ def apply(app: QApplication, theme: str = "dark", full: bool = True) -> None:
     app.setFont(font("body"))
     app.setPalette(palette(theme))
     app.setStyleSheet(qss(theme, full))
+    if not hasattr(app, "_socle_centrage"):
+        app._socle_centrage = _Centrage(app)
+        app.installEventFilter(app._socle_centrage)
 
