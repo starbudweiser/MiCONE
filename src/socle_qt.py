@@ -274,6 +274,8 @@ class WrapChoice(QWidget):
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(int(m("space-2.5")))
+        # la case occupe la hauteur de la première ligne : centrée sur le texte, pas collée en haut
+        self.box.setFixedHeight(self.label.fontMetrics().lineSpacing())
         lay.addWidget(self.box, 0, Qt.AlignmentFlag.AlignTop)
         lay.addWidget(self.label, 1)
         self.toggled = self.box.toggled
@@ -545,6 +547,7 @@ QComboBox QAbstractItemView {{ background-color: {k['surface']}; color: {k['text
 QComboBox QAbstractItemView::item {{ min-height: {m('size-control') - 8}px; padding: 0 {m('space-2')}px; border-radius: {r}px; }}
 
 /* Choix */
+QSlider {{ background: transparent; }}
 QCheckBox, QRadioButton {{ background: transparent; spacing: {m('space-2.5')}px; color: {k['text']}; }}
 QCheckBox::indicator, QRadioButton::indicator {{ width: {m('size-choice') - 3}px; height: {m('size-choice') - 3}px; border: 1.5px solid {k['border-control']}; background-color: {k['surface']}; }}
 QCheckBox::indicator {{ border-radius: {r}px; }}
