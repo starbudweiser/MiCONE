@@ -17,7 +17,7 @@ import tempfile
 from PyQt6.QtCore import QEvent, QSettings, Qt, QTimer
 from PyQt6.QtGui import QAction, QColor, QGuiApplication, QImage, QPixmap
 from PyQt6.QtWidgets import (QApplication, QColorDialog, QComboBox, QFileDialog, QFrame, QHBoxLayout,
-                             QLabel, QMenuBar, QMessageBox, QPushButton, QSlider, QStackedWidget, QVBoxLayout,
+                             QLabel, QLineEdit, QMenuBar, QMessageBox, QPushButton, QSlider, QStackedWidget, QVBoxLayout,
                              QWidget)
 
 import ia
@@ -257,6 +257,11 @@ class Fenetre(QWidget):
         self.b_appliquer = socle_qt.variant(QPushButton(t("appliquer_dossier")), "secondary")
         self.b_appliquer.clicked.connect(self.appliquer)
         lc.addWidget(self.b_appliquer)
+        lc.addWidget(socle_qt.role(QLabel(t("nom_iconiq")), "muted"))
+        self.e_nom = QLineEdit()
+        self.e_nom.setClearButtonEnabled(True)
+        self.e_nom.returnPressed.connect(self.envoyer_iconiq)
+        lc.addWidget(self.e_nom)
         self.b_iconiq = socle_qt.variant(QPushButton(t("envoyer_iconiq")), "secondary")
         self.b_iconiq.clicked.connect(self.envoyer_iconiq)
         lc.addWidget(self.b_iconiq)
@@ -418,6 +423,7 @@ class Fenetre(QWidget):
         self.l_decal.setText(f"{self.r.decalage_y:+d} %")
         self.b_creer.setEnabled(self.source is not None)
         self.b_iconiq.setEnabled(self.source is not None)
+        self.e_nom.setEnabled(self.source is not None)
 
     def _choisir_couleur(self):
         c = QColorDialog.getColor(QColor(self.r.couleur), self, t("choisir_couleur"))
@@ -450,6 +456,7 @@ class Fenetre(QWidget):
             return
         self.source, self.chemin_source, self._detouree = img, chemin, None
         self.reglages_qt.setValue("dossier", os.path.dirname(chemin))
+        self.e_nom.setText(os.path.splitext(os.path.basename(chemin))[0])
         self.l_info.setText(t("image_info", nom=os.path.basename(chemin), l=img.width(), h=img.height()))
         self.pile.setCurrentIndex(1)
         self._statut("", "none")
@@ -500,11 +507,12 @@ class Fenetre(QWidget):
         if not iconiq.installee():
             self._statut(t("iconiq_absent"), "danger")
             return
-        nom = os.path.splitext(os.path.basename(self.chemin_source or "MiCONE"))[0]
+        nom = self.e_nom.text().strip() or os.path.splitext(os.path.basename(self.chemin_source or "MiCONE"))[0]
+        stem = os.path.splitext(os.path.basename(self.chemin_source or "MiCONE"))[0]
         genre = "folder" if self.r.type == "dossier" else "app"
-        fichier = os.path.join(tempfile.gettempdir(), f"micone_{nom}.png")
+        fichier = os.path.join(tempfile.gettempdir(), f"micone_{stem}.png")
         if not rendu.rendre(self._motif(), self.r).save(fichier, "PNG") \
-                or not iconiq.envoyer(nom, fichier, f"{genre}:{self.chemin_source or nom}", genre):
+                or not iconiq.envoyer(nom, fichier, f"{genre}:{self.chemin_source or stem}", genre):
             self._statut(t("erreur_iconiq"), "danger")
             return
         self._statut(t("ok_iconiq"), "success")
