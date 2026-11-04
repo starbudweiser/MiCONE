@@ -17,4 +17,4 @@ Automatic background removal (`ia.detourer_auto`): icon plate → numpy magic wa
 - Release: bump `src/version.py`, commit, `./release.sh` (build, Developer ID signing, notarization, stapling, zip, push, GitHub release). Every published build is Developer ID signed: a locally signed build will not auto-update to it.
 
 ## Link with iCONIQ
-- `src/iconiq.py` (live link): every exported icon (and every folder icon applied) is dropped into `~/Library/Application Support/iCONIQ/Inbox/` (file + `.json` descriptor: name, origin, kind). iCONIQ files it in its "PERSONNEL" collection, or updates in place the icon already linked to the same origin. If iCONIQ is not running it is started in the background (`open -g`). Menu "Send every icon to iCONIQ" (on by default, `iconiq_auto`).
+- `src/iconiq.py`: the "Send to iCONIQ" button drops the displayed icon (PNG, kind app/folder, origin = source image) into `~/Library/Application Support/iCONIQ/Inbox/` (file + `.json` descriptor). iCONIQ files it in its "PERSONNEL" collection, or updates in place the icon already linked to the same origin; it is started in the background (`open -g`) if not running. Nothing is sent automatically.

@@ -85,7 +85,6 @@ class Fenetre(QWidget):
         self.reglages_qt = QSettings("MiCONE", "MiCONE")
         self.r = rendu.Reglages.depuis_dict(self.reglages_qt.value("reglages", {}) or {})
         self.png_aussi = self.reglages_qt.value("png_aussi", False) in (True, "true")
-        self.iconiq_auto = self.reglages_qt.value("iconiq_auto", True) in (True, "true")
         self.source: QImage | None = None
         self._detouree: QImage | None = None
         self.chemin_source: str | None = None
@@ -125,8 +124,6 @@ class Fenetre(QWidget):
         action(t("maj_menu"), QAction.MenuRole.ApplicationSpecificRole, lambda *_: self.maj.verifier(manuel=True))
         action(t("maj_auto"), QAction.MenuRole.ApplicationSpecificRole, lambda v: setattr(self.maj, "auto", v),
                coche=self.maj.auto)
-        action(t("iconiq_auto"), QAction.MenuRole.ApplicationSpecificRole,
-               lambda v: self.reglages_qt.setValue("iconiq_auto", v), coche=self.iconiq_auto)
 
     def _etat_maj(self, cle: str, release, manuel: bool):
         version = release.version if release else ""
@@ -260,6 +257,9 @@ class Fenetre(QWidget):
         self.b_appliquer = socle_qt.variant(QPushButton(t("appliquer_dossier")), "secondary")
         self.b_appliquer.clicked.connect(self.appliquer)
         lc.addWidget(self.b_appliquer)
+        self.b_iconiq = socle_qt.variant(QPushButton(t("envoyer_iconiq")), "secondary")
+        self.b_iconiq.clicked.connect(self.envoyer_iconiq)
+        lc.addWidget(self.b_iconiq)
 
         # Zone de travail : dépôt ou aperçu.
         travail = QFrame()
@@ -417,6 +417,7 @@ class Fenetre(QWidget):
         self.l_taille.setText(f"{self.r.taille} %")
         self.l_decal.setText(f"{self.r.decalage_y:+d} %")
         self.b_creer.setEnabled(self.source is not None)
+        self.b_iconiq.setEnabled(self.source is not None)
 
     def _choisir_couleur(self):
         c = QColorDialog.getColor(QColor(self.r.couleur), self, t("choisir_couleur"))
@@ -489,16 +490,24 @@ class Fenetre(QWidget):
         except OSError as e:
             self._statut(t("erreur_export", erreur=e), "danger")
             return
-        envoye = self._vers_iconiq(os.path.splitext(os.path.basename(self.dernier_export))[0], self.dernier_export,
-                                   self.dernier_export, "app")
-        self._statut(t("ok_export", chemin=self.dernier_export) + (t("ok_iconiq") if envoye else ""), "success")
+        self._statut(t("ok_export", chemin=self.dernier_export), "success")
         self.b_reveler.show()
 
-    def _vers_iconiq(self, nom: str, fichier: str, origine: str, genre: str) -> bool:
-        """Lien dynamique : dépose l'icône dans iCONIQ (collection « MiCONE »), si l'envoi est activé dans le menu."""
-        if self.reglages_qt.value("iconiq_auto", True) not in (True, "true"):
-            return False
-        return iconiq.envoyer(nom, fichier, origine, genre)
+    def envoyer_iconiq(self):
+        """Dépose l'icône affichée dans iCONIQ (collection « MiCONE ») ; la même image source met à jour l'icône déjà suivie."""
+        if self.source is None:
+            return
+        if not iconiq.installee():
+            self._statut(t("iconiq_absent"), "danger")
+            return
+        nom = os.path.splitext(os.path.basename(self.chemin_source or "MiCONE"))[0]
+        genre = "folder" if self.r.type == "dossier" else "app"
+        fichier = os.path.join(tempfile.gettempdir(), f"micone_{nom}.png")
+        if not rendu.rendre(self._motif(), self.r).save(fichier, "PNG") \
+                or not iconiq.envoyer(nom, fichier, f"{genre}:{self.chemin_source or nom}", genre):
+            self._statut(t("erreur_iconiq"), "danger")
+            return
+        self._statut(t("ok_iconiq"), "success")
 
     def appliquer(self):
         if self.source is None:
@@ -515,9 +524,7 @@ class Fenetre(QWidget):
             self._statut(t("erreur_export", erreur=e), "danger")
             return
         self.dernier_export = cible
-        png = os.path.join(tempfile.gettempdir(), f"micone_{os.path.basename(cible)}.png")
-        envoye = icone.save(png, "PNG") and self._vers_iconiq(os.path.basename(cible), png, "dossier:" + cible, "folder")
-        self._statut(t("ok_applique", chemin=cible) + (t("ok_iconiq") if envoye else ""), "success")
+        self._statut(t("ok_applique", chemin=cible), "success")
         self.b_reveler.show()
 
     def _reveler(self):
