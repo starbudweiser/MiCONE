@@ -12,6 +12,7 @@ import argparse
 import os
 import subprocess
 import sys
+import tempfile
 
 from PyQt6.QtCore import QEvent, QSettings, Qt, QTimer
 from PyQt6.QtGui import QAction, QColor, QGuiApplication, QImage, QPixmap
@@ -20,6 +21,7 @@ from PyQt6.QtWidgets import (QApplication, QColorDialog, QComboBox, QFileDialog,
                              QWidget)
 
 import ia
+import iconiq
 import maj
 import rendu
 import socle_qt
@@ -83,6 +85,7 @@ class Fenetre(QWidget):
         self.reglages_qt = QSettings("MiCONE", "MiCONE")
         self.r = rendu.Reglages.depuis_dict(self.reglages_qt.value("reglages", {}) or {})
         self.png_aussi = self.reglages_qt.value("png_aussi", False) in (True, "true")
+        self.iconiq_auto = self.reglages_qt.value("iconiq_auto", True) in (True, "true")
         self.source: QImage | None = None
         self._detouree: QImage | None = None
         self.chemin_source: str | None = None
@@ -122,6 +125,8 @@ class Fenetre(QWidget):
         action(t("maj_menu"), QAction.MenuRole.ApplicationSpecificRole, lambda *_: self.maj.verifier(manuel=True))
         action(t("maj_auto"), QAction.MenuRole.ApplicationSpecificRole, lambda v: setattr(self.maj, "auto", v),
                coche=self.maj.auto)
+        action(t("iconiq_auto"), QAction.MenuRole.ApplicationSpecificRole,
+               lambda v: self.reglages_qt.setValue("iconiq_auto", v), coche=self.iconiq_auto)
 
     def _etat_maj(self, cle: str, release, manuel: bool):
         version = release.version if release else ""
@@ -484,8 +489,16 @@ class Fenetre(QWidget):
         except OSError as e:
             self._statut(t("erreur_export", erreur=e), "danger")
             return
-        self._statut(t("ok_export", chemin=self.dernier_export), "success")
+        envoye = self._vers_iconiq(os.path.splitext(os.path.basename(self.dernier_export))[0], self.dernier_export,
+                                   self.dernier_export, "app")
+        self._statut(t("ok_export", chemin=self.dernier_export) + (t("ok_iconiq") if envoye else ""), "success")
         self.b_reveler.show()
+
+    def _vers_iconiq(self, nom: str, fichier: str, origine: str, genre: str) -> bool:
+        """Lien dynamique : dépose l'icône dans iCONIQ (collection « MiCONE »), si l'envoi est activé dans le menu."""
+        if self.reglages_qt.value("iconiq_auto", True) not in (True, "true"):
+            return False
+        return iconiq.envoyer(nom, fichier, origine, genre)
 
     def appliquer(self):
         if self.source is None:
@@ -496,12 +509,15 @@ class Fenetre(QWidget):
             return
         self.reglages_qt.setValue("dossier_cible", os.path.dirname(cible))
         try:
-            rendu.appliquer_dossier(rendu.rendre(self._motif(), self.r), cible)
+            icone = rendu.rendre(self._motif(), self.r)
+            rendu.appliquer_dossier(icone, cible)
         except OSError as e:
             self._statut(t("erreur_export", erreur=e), "danger")
             return
         self.dernier_export = cible
-        self._statut(t("ok_applique", chemin=cible), "success")
+        png = os.path.join(tempfile.gettempdir(), f"micone_{os.path.basename(cible)}.png")
+        envoye = icone.save(png, "PNG") and self._vers_iconiq(os.path.basename(cible), png, "dossier:" + cible, "folder")
+        self._statut(t("ok_applique", chemin=cible) + (t("ok_iconiq") if envoye else ""), "success")
         self.b_reveler.show()
 
     def _reveler(self):
