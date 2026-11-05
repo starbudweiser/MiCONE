@@ -337,15 +337,19 @@ class Fenetre(QWidget):
         self.pile.addWidget(vue)
         lt.addWidget(self.pile, 1)
 
-        bas = QHBoxLayout()
+        self.zone_bas = QWidget()   # ligne d'état : absente tant qu'elle n'a rien à dire, la zone de travail prend sa place
+        bas = QHBoxLayout(self.zone_bas)
+        bas.setContentsMargins(0, 0, 0, 0)
         self.l_statut = socle_qt.role(QLabel(""), "muted")
         self.l_statut.setWordWrap(True)
         bas.addWidget(self.l_statut, 1)
         self.b_reveler = socle_qt.variant(QPushButton(t("reveler")), "tertiary")
         self.b_reveler.clicked.connect(self._reveler)
         self.b_reveler.hide()
+        self._maj_bas()
         bas.addWidget(self.b_reveler)
-        lt.addLayout(bas)
+        self.zone_bas.hide()
+        lt.addWidget(self.zone_bas)
 
         self.setStyleSheet(
             f"QSlider::groove:horizontal {{ height: 4px; background: {socle_qt.c('control')}; border-radius: 2px; }}"
@@ -491,6 +495,7 @@ class Fenetre(QWidget):
         self.pile.setCurrentIndex(1)
         self._statut("", "none")
         self.b_reveler.hide()
+        self._maj_bas()
         self._etat_controles()
         self._rendre()
 
@@ -529,6 +534,7 @@ class Fenetre(QWidget):
             return
         self._statut(t("ok_export", chemin=self.dernier_export), "success")
         self.b_reveler.show()
+        self._maj_bas()
 
     def _remplir_collections(self):
         """Liste les collections d'iCONIQ ; la dernière choisie est reprise."""
@@ -578,6 +584,7 @@ class Fenetre(QWidget):
         self.dernier_export = cible
         self._statut(t("ok_applique", chemin=cible), "success")
         self.b_reveler.show()
+        self._maj_bas()
 
     def _reveler(self):
         if self.dernier_export:
@@ -594,6 +601,10 @@ class Fenetre(QWidget):
     def _statut(self, texte: str, statut: str):
         self.l_statut.setText(texte)
         socle_qt.status(self.l_statut, statut)
+        self._maj_bas()
+
+    def _maj_bas(self):
+        self.zone_bas.setVisible(bool(self.l_statut.text()) or not self.b_reveler.isHidden())
 
     # ------------------------------------------------------------ glisser-déposer
 
