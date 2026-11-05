@@ -687,7 +687,7 @@ if __name__ == "__main__":
     socle_qt.brand(app, "MiCONE", "#4090f0")   # la minuscule du nom prend la couleur du logo
     socle_qt.traduire_qt(app, LANGUE)   # menu de l'appli (Masquer, Quitter, Services…) dans la langue choisie
     app.fenetre = Fenetre()   # prête avant le splash : l'animation ne saccade pas à son ouverture
-    app.splash = Splash()     # t = 0 splash, t = 2 s fenêtre principale, t = 4 s sortie du splash
+    app.splash = Splash()     # t = 0 splash, t = 2 s fenêtre principale, t = 3 s sortie du splash
     app.splash.demarrer(app.fenetre.show)
     QTimer.singleShot(3000, app.fenetre.maj.verifier)   # nouvelle version ? (au plus une fois par jour)
     a_ouvrir = app.en_attente or next((x for x in sys.argv[1:] if os.path.isfile(x)), None)

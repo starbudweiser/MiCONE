@@ -1,7 +1,7 @@
 """Écran de lancement animé (règle Socle « Splash animé », même construction que celui de sKYCRASH).
 
 Fenêtre sans cadre et transparente de 500 × 190 px (carte de 476 × 166 et marge de 12 px), centrée.
-Chronologie : t = 0 splash visible → t = 2 s fenêtre principale → t = 4 s sortie animée de 600 ms.
+Chronologie : t = 0 splash visible → t = 2 s fenêtre principale → t = 3 s sortie animée de 600 ms.
 Réglage « Réduire les animations » de macOS : splash fixe, mêmes durées.
 
 Le logo reprend le motif de l'icône (assets/motif.png), redessiné au QPainter pour animer ses pièces.
@@ -22,7 +22,7 @@ from textes import t as texte
 LARGEUR = socle_qt.m("size-splash-width")    # 500 : carte de 476 et marge de 12
 HAUTEUR = socle_qt.m("size-splash-height")   # 190 : carte de 166 et marge de 12
 MARGE = 12
-AFFICHE_MS = 4000       # durée à l'écran avant la sortie
+AFFICHE_MS = 3000       # durée à l'écran avant la sortie
 FENETRE_MS = 2000       # ouverture de la fenêtre principale
 SORTIE_MS = 600
 ANIMATION_MS = 2100     # tout est en place : plus rien à redessiner jusqu'à la sortie
