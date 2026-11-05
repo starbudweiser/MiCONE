@@ -144,23 +144,23 @@ class Fenetre(QWidget):
         version = release.version if release else ""
         if cle == "a_jour":
             if manuel:
-                self._statut(t("maj_a_jour", version=maj.version_courante()[0]), "success")
+                self._statut_maj(t("maj_a_jour", version=maj.version_courante()[0]), "success")
         elif cle == "disponible":
             if self.maj.auto:
-                self._statut(t("maj_telechargement", version=version), "none")
+                self._statut_maj(t("maj_telechargement", version=version), "none")
                 # Un travail en cours n'est pas interrompu : la version s'installe alors à la fermeture.
                 self.maj.installer(release, relancer=self.source is None, manuel=manuel)
             elif self._demander_installation(version):
-                self._statut(t("maj_telechargement", version=version), "none")
+                self._statut_maj(t("maj_telechargement", version=version), "none")
                 self.maj.installer(release, relancer=True, manuel=True)
         elif cle == "installation":
-            self._statut(t("maj_installation", version=version), "success")
+            self._statut_maj(t("maj_installation", version=version), "success")
             QTimer.singleShot(400, QApplication.quit)
         elif cle == "differee":
-            self._statut(t("maj_differee", version=version), "success")
+            self._statut_maj(t("maj_differee", version=version), "success")
         elif cle in ERREURS_MAJ:
             if manuel or release is not None:   # silencieux seulement pour une recherche automatique hors ligne
-                self._statut(t(ERREURS_MAJ[cle]), "danger")
+                self._statut_maj(t(ERREURS_MAJ[cle]), "danger")
 
     def _demander_installation(self, version: str) -> bool:
         boite = QMessageBox(self)
@@ -186,6 +186,9 @@ class Fenetre(QWidget):
         le.addWidget(socle_qt.role(QLabel("MiCONE"), "title"))
         le.addWidget(socle_qt.role(QLabel(t("sous_titre")), "subtle"))
         le.addStretch(1)
+        self.l_maj = QLabel("")
+        self.l_maj.setVisible(False)
+        le.addWidget(self.l_maj)
         b_info = BoutonIcone("info", t("apropos_menu"))
         b_info.clicked.connect(lambda *_: APropos.afficher())
         le.addWidget(b_info)
@@ -579,6 +582,14 @@ class Fenetre(QWidget):
     def _reveler(self):
         if self.dernier_export:
             subprocess.run(["open", "-R", self.dernier_export])
+
+    def _statut_maj(self, texte: str, statut: str):
+        """Message de mise à jour : dans l'en-tête, à gauche du bouton « À propos ». Un « à jour » s'efface seul."""
+        self.l_maj.setText(texte)
+        self.l_maj.setVisible(bool(texte))
+        socle_qt.status(self.l_maj, statut)
+        if statut == "success" and texte == t("maj_a_jour", version=maj.version_courante()[0]):
+            QTimer.singleShot(10000, lambda: self.l_maj.text() == texte and self._statut_maj("", "none"))
 
     def _statut(self, texte: str, statut: str):
         self.l_statut.setText(texte)
