@@ -262,6 +262,10 @@ class Fenetre(QWidget):
         self.e_nom.setClearButtonEnabled(True)
         self.e_nom.returnPressed.connect(self.envoyer_iconiq)
         lc.addWidget(self.e_nom)
+        lc.addWidget(socle_qt.role(QLabel(t("collection_iconiq")), "muted"))
+        self.c_collection = QComboBox()
+        lc.addWidget(self.c_collection)
+        self._remplir_collections()
         self.b_iconiq = socle_qt.variant(QPushButton(t("envoyer_iconiq")), "secondary")
         self.b_iconiq.clicked.connect(self.envoyer_iconiq)
         lc.addWidget(self.b_iconiq)
@@ -424,6 +428,7 @@ class Fenetre(QWidget):
         self.b_creer.setEnabled(self.source is not None)
         self.b_iconiq.setEnabled(self.source is not None)
         self.e_nom.setEnabled(self.source is not None)
+        self.c_collection.setEnabled(self.source is not None)
 
     def _choisir_couleur(self):
         c = QColorDialog.getColor(QColor(self.r.couleur), self, t("choisir_couleur"))
@@ -457,6 +462,7 @@ class Fenetre(QWidget):
         self.source, self.chemin_source, self._detouree = img, chemin, None
         self.reglages_qt.setValue("dossier", os.path.dirname(chemin))
         self.e_nom.setText(os.path.splitext(os.path.basename(chemin))[0])
+        self._remplir_collections()
         self.l_info.setText(t("image_info", nom=os.path.basename(chemin), l=img.width(), h=img.height()))
         self.pile.setCurrentIndex(1)
         self._statut("", "none")
@@ -500,6 +506,18 @@ class Fenetre(QWidget):
         self._statut(t("ok_export", chemin=self.dernier_export), "success")
         self.b_reveler.show()
 
+    def _remplir_collections(self):
+        """Liste les collections d'iCONIQ ; la dernière choisie est reprise."""
+        derniere = self.c_collection.currentData() or self.reglages_qt.value("collection_iconiq", "")
+        self.c_collection.blockSignals(True)
+        self.c_collection.clear()
+        self.c_collection.addItem(iconiq.PAR_DEFAUT, "")
+        for ident, chemin in iconiq.collections():
+            if chemin != iconiq.PAR_DEFAUT:   # déjà proposée en tête
+                self.c_collection.addItem(chemin, ident)
+        self.c_collection.setCurrentIndex(max(0, self.c_collection.findData(derniere)))
+        self.c_collection.blockSignals(False)
+
     def envoyer_iconiq(self):
         """Dépose l'icône affichée dans iCONIQ (collection « MiCONE ») ; la même image source met à jour l'icône déjà suivie."""
         if self.source is None:
@@ -512,9 +530,11 @@ class Fenetre(QWidget):
         genre = "folder" if self.r.type == "dossier" else "app"
         fichier = os.path.join(tempfile.gettempdir(), f"micone_{stem}.png")
         if not rendu.rendre(self._motif(), self.r).save(fichier, "PNG") \
-                or not iconiq.envoyer(nom, fichier, f"{genre}:{self.chemin_source or stem}", genre):
+                or not iconiq.envoyer(nom, fichier, f"{genre}:{self.chemin_source or stem}", genre,
+                                      self.c_collection.currentData() or None):
             self._statut(t("erreur_iconiq"), "danger")
             return
+        self.reglages_qt.setValue("collection_iconiq", self.c_collection.currentData() or "")
         self._statut(t("ok_iconiq"), "success")
 
     def appliquer(self):

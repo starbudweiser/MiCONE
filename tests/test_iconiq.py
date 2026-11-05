@@ -30,6 +30,16 @@ class LienIconiq(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(iconiq.BOITE, d["file"])))
         self.assertFalse([n for n in noms if n.endswith(".tmp")])
 
+    def test_collection_choisie(self):
+        src = os.path.join(self.tmp, "Mon.icns")
+        open(src, "wb").write(b"icns")
+        self.assertTrue(iconiq.envoyer("Mon", src, src, "app", "ID-COLLECTION"))
+        js = [n for n in os.listdir(iconiq.BOITE) if n.endswith(".json")]
+        self.assertEqual(json.load(open(os.path.join(iconiq.BOITE, js[0])))["collection"], "ID-COLLECTION")
+
+    def test_sans_bibliotheque_aucune_collection(self):
+        self.assertEqual(iconiq.collections(), [])
+
     def test_fichier_absent(self):
         self.assertFalse(iconiq.envoyer("x", "/inexistant.icns", "/inexistant.icns"))
 
