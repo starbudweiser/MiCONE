@@ -14,12 +14,13 @@ import subprocess
 import sys
 import tempfile
 
-from PyQt6.QtCore import QEvent, QSettings, Qt, QTimer
+from PyQt6.QtCore import QEvent, QPoint, QSettings, Qt, QTimer
 from PyQt6.QtGui import QAction, QColor, QGuiApplication, QImage, QPixmap
-from PyQt6.QtWidgets import (QApplication, QColorDialog, QComboBox, QFileDialog, QFrame, QHBoxLayout,
+from PyQt6.QtWidgets import (QApplication, QMenu, QColorDialog, QComboBox, QFileDialog, QFrame, QHBoxLayout,
                              QLabel, QLineEdit, QMenuBar, QMessageBox, QPushButton, QSlider, QStackedWidget, QVBoxLayout,
                              QWidget)
 
+from bouton_icone import BoutonIcone
 import ia
 import iconiq
 import maj
@@ -125,6 +126,20 @@ class Fenetre(QWidget):
         action(t("maj_auto"), QAction.MenuRole.ApplicationSpecificRole, lambda v: setattr(self.maj, "auto", v),
                coche=self.maj.auto)
 
+    def _menu_reglages(self):
+        """Roue crantée : menu des réglages (mises à jour), sous le bouton."""
+        menu = QMenu(self)
+        a = menu.addAction(t("maj_menu"))
+        a.setMenuRole(QAction.MenuRole.NoRole)
+        a.triggered.connect(lambda *_: self.maj.verifier(manuel=True))
+        auto = menu.addAction(t("maj_auto"))
+        auto.setMenuRole(QAction.MenuRole.NoRole)
+        auto.setCheckable(True)
+        auto.setChecked(self.maj.auto)
+        auto.toggled.connect(lambda v: setattr(self.maj, "auto", v))
+        coin = self.b_reglages.mapToGlobal(self.b_reglages.rect().bottomRight())
+        menu.exec(QPoint(coin.x() - menu.sizeHint().width(), coin.y() + 4))
+
     def _etat_maj(self, cle: str, release, manuel: bool):
         version = release.version if release else ""
         if cle == "a_jour":
@@ -171,6 +186,12 @@ class Fenetre(QWidget):
         le.addWidget(socle_qt.role(QLabel("MiCONE"), "title"))
         le.addWidget(socle_qt.role(QLabel(t("sous_titre")), "subtle"))
         le.addStretch(1)
+        b_info = BoutonIcone("info", t("apropos_menu"))
+        b_info.clicked.connect(lambda *_: APropos.afficher())
+        le.addWidget(b_info)
+        self.b_reglages = BoutonIcone("reglages", t("reglages"))
+        self.b_reglages.clicked.connect(self._menu_reglages)
+        le.addWidget(self.b_reglages)
         racine.addWidget(entete)
 
         corps = QHBoxLayout()
