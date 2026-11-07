@@ -121,7 +121,7 @@ class Fenetre(QWidget):
             menu.addAction(a)
             return a
 
-        action(t("apropos_menu"), QAction.MenuRole.AboutRole, lambda *_: APropos.afficher())
+        action(t("apropos_menu"), QAction.MenuRole.AboutRole, lambda *_: APropos.afficher(self))
         action(t("maj_menu"), QAction.MenuRole.ApplicationSpecificRole, lambda *_: self.maj.verifier(manuel=True))
         action(t("maj_auto"), QAction.MenuRole.ApplicationSpecificRole, lambda v: setattr(self.maj, "auto", v),
                coche=self.maj.auto)
@@ -190,7 +190,7 @@ class Fenetre(QWidget):
         self.l_maj.setVisible(False)
         le.addWidget(self.l_maj)
         b_info = BoutonIcone("info", t("apropos_menu"))
-        b_info.clicked.connect(lambda *_: APropos.afficher())
+        b_info.clicked.connect(lambda *_: APropos.afficher(self))
         le.addWidget(b_info)
         self.b_reglages = BoutonIcone("reglages", t("reglages"))
         self.b_reglages.clicked.connect(self._menu_reglages)

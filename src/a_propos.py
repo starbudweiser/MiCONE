@@ -4,9 +4,9 @@ from __future__ import annotations
 import os
 import sys
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QGuiApplication, QPixmap
-from PyQt6.QtWidgets import QDialog, QLabel, QVBoxLayout
+from PyQt6.QtWidgets import QDialog, QLabel, QVBoxLayout, QWidget
 
 import maj
 import socle_qt
@@ -28,13 +28,27 @@ class APropos(QDialog):
     _instance: "APropos | None" = None
 
     @classmethod
-    def afficher(cls) -> None:
+    def afficher(cls, fenetre: QWidget | None = None) -> None:
+        """Ouvre la fenêtre, centrée sur la fenêtre de l'appli (où qu'elle soit), sinon sur l'écran."""
         if cls._instance is None:
             cls._instance = cls()
+            cls._instance.setProperty("socle_centre", True)   # sinon Socle la centre sur l'écran à sa première apparition
         d = cls._instance
+        if fenetre is not None:
+            d._parent_centre = fenetre
         d.show()
+        d._centrer_sur_parent()
+        QTimer.singleShot(0, d._centrer_sur_parent)   # les marges du cadre ne sont connues qu'après l'affichage
         d.raise_()
         d.activateWindow()
+
+    def _centrer_sur_parent(self) -> None:
+        f = getattr(self, "_parent_centre", None)
+        if f is None:
+            return
+        cadre = self.frameGeometry()
+        cadre.moveCenter(f.frameGeometry().center())
+        self.move(cadre.topLeft())
 
     def __init__(self):
         super().__init__()
