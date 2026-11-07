@@ -328,26 +328,54 @@ def fit_height(window: QWidget) -> QWidget:
     return window
 
 
-def centrer(window: QWidget) -> QWidget:
-    """Centre la fenêtre sur l'écran du pointeur, dans sa zone utile (hors barre des menus et Dock)."""
+def centrer(window: QWidget, sur: QWidget | None = None) -> QWidget:
+    """Centre la fenêtre sur la fenêtre `sur` si elle est donnée, sinon sur l'écran du pointeur (zone utile : hors barre des menus et Dock)."""
+    cadre = window.frameGeometry()
+    if sur is not None:
+        cadre.moveCenter(sur.frameGeometry().center())
+        ecran = QGuiApplication.screenAt(sur.frameGeometry().center()) or QGuiApplication.primaryScreen()
+        zone = ecran.availableGeometry()
+        window.move(min(max(zone.left(), cadre.left()), max(zone.left(), zone.right() - cadre.width() + 1)),
+                    min(max(zone.top(), cadre.top()), max(zone.top(), zone.bottom() - cadre.height() + 1)))
+        return window
     ecran = QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()
     zone = ecran.availableGeometry()
-    cadre = window.frameGeometry()
     window.move(max(zone.left(), zone.center().x() - cadre.width() // 2),
                 max(zone.top(), zone.center().y() - cadre.height() // 2))
     return window
 
 
+def fenetre_appli(sauf: QWidget | None = None) -> QWidget | None:
+    """Fenêtre de l'appli sur laquelle centrer une fenêtre secondaire : sa fenêtre parente, la fenêtre active, sinon une autre fenêtre visible."""
+    candidates = []
+    if sauf is not None and sauf.parentWidget() is not None:
+        candidates.append(sauf.parentWidget().window())
+    candidates.append(QApplication.activeWindow())
+    candidates += QApplication.topLevelWidgets()
+    for w in candidates:
+        if (w is not None and w is not sauf and w.isVisible() and w.windowType() in (Qt.WindowType.Window, Qt.WindowType.Dialog)
+                and not w.size().isEmpty()):
+            return w
+    return None
+
+
 class _Centrage(QObject):
+    """Première fenêtre : centrée sur l'écran. Fenêtres secondaires (dialogues, alertes) : centrées sur la fenêtre de l'appli, à chaque affichage."""
+
     def eventFilter(self, obj, event):
-        if (event.type() == QEvent.Type.Show and isinstance(obj, QWidget) and obj.isWindow()
-                and obj.windowType() == Qt.WindowType.Window and not obj.property("socle_centre")):
+        if event.type() == QEvent.Type.Show and isinstance(obj, QWidget) and obj.isWindow():
+            type_ = obj.windowType()
+            secondaire = type_ == Qt.WindowType.Dialog
+            if type_ not in (Qt.WindowType.Window, Qt.WindowType.Dialog) or (not secondaire and obj.property("socle_centre")):
+                return False
+            if secondaire and obj.property("socle_centre_manuel"):   # l'appli centre elle-même (ex. « À propos »)
+                return False
             obj.setProperty("socle_centre", True)
-            if not obj.testAttribute(Qt.WidgetAttribute.WA_Moved):  # une fenêtre placée par l'appli (splash) reste où elle est
-                centrer(obj)
+            if not obj.testAttribute(Qt.WidgetAttribute.WA_Moved) or secondaire:  # une fenêtre placée par l'appli (splash) reste où elle est
+                centrer(obj, fenetre_appli(obj) if secondaire else None)
                 recentrage = QTimer(obj)  # la barre de titre ne compte dans le cadre qu'une fois la fenêtre affichée
                 recentrage.setSingleShot(True)
-                recentrage.timeout.connect(lambda: centrer(obj))
+                recentrage.timeout.connect(lambda: centrer(obj, fenetre_appli(obj) if secondaire else None))
                 recentrage.start(0)
         return False
 

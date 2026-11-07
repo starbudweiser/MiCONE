@@ -32,7 +32,7 @@ class APropos(QDialog):
         """Ouvre la fenêtre, centrée sur la fenêtre de l'appli (où qu'elle soit), sinon sur l'écran."""
         if cls._instance is None:
             cls._instance = cls()
-            cls._instance.setProperty("socle_centre", True)   # sinon Socle la centre sur l'écran à sa première apparition
+            cls._instance.setProperty("socle_centre_manuel", True)
         d = cls._instance
         if fenetre is not None:
             d._parent_centre = fenetre
