@@ -18,7 +18,7 @@ BOITE = os.path.join(RACINE, "Inbox")
 APPLIS = [os.path.expanduser("~/Applications/Applications Personnelles/iCONIQ.app"), "/Applications/iCONIQ.app"]
 
 
-PAR_DEFAUT = "PERSONNEL"   # collection où iCONIQ range les icônes quand aucune n'est choisie
+PAR_DEFAUT = "MiCONE"       # collection où iCONIQ range les icônes quand aucune n'est choisie
 
 
 def collections() -> list[tuple[str, str]]:
