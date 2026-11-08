@@ -216,9 +216,9 @@ final class PipetteCouleur: NSObject {
     }
 }
 
-/// Taille par défaut de la fenêtre (celle choisie le 08/11/2026), réduite à l'écran si besoin, centrée à l'ouverture.
+/// Taille par défaut de la fenêtre (celle choisie par Stéphan le 08/11/2026, fenêtre en mode Dossier), réduite à l'écran si besoin, centrée à l'ouverture.
 enum TailleFenetre {
-    static let defaut = NSSize(width: 940, height: 994)
+    static let defaut = NSSize(width: 940, height: 1062)
 }
 
 private struct AjusteFenetre: NSViewRepresentable {
