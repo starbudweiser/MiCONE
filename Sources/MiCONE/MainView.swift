@@ -6,7 +6,6 @@ struct MainView: View {
     @ObservedObject var m = Modele.shared
     @ObservedObject var maj = UpdateEngine.shared
     @AppStorage("autoUpdate") private var autoUpdate = true
-    @State private var hauteurColonne: CGFloat = 0
 
     var body: some View {
         VStack(spacing: Socle.M.space3) {
@@ -18,7 +17,7 @@ struct MainView: View {
         }
         .padding(Socle.M.space3)
         .background(Socle.C.bg)
-        .background(AjusteFenetre(hauteur: hauteurColonne + Socle.M.sizeBar + 3 * Socle.M.space3))
+        .background(AjusteFenetre())
         .onDrop(of: [.fileURL], isTargeted: $m.depotSurvol) { providers in
             guard let p = providers.first else { return false }
             _ = p.loadObject(ofClass: URL.self) { url, _ in
@@ -124,10 +123,8 @@ struct MainView: View {
                 Button(L("envoyer_iconiq")) { m.envoyerIconiQ() }.buttonStyle(SocleButtonStyle(.secondary)).disabled(!m.aImage)
             }
             .padding(Socle.M.space3)
-            .background(GeometryReader { g in Color.clear.preference(key: HauteurKey.self, value: g.size.height) })
             }
             .scrollIndicators(.automatic)
-            .onPreferenceChange(HauteurKey.self) { hauteurColonne = $0 }
         }
         .frame(width: 300)
     }
@@ -219,33 +216,26 @@ final class PipetteCouleur: NSObject {
     }
 }
 
-private struct HauteurKey: PreferenceKey {
-    static let defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+/// Taille par défaut de la fenêtre (celle choisie le 08/11/2026), réduite à l'écran si besoin, centrée à l'ouverture.
+enum TailleFenetre {
+    static let defaut = NSSize(width: 940, height: 994)
 }
 
-/// Ouvre la fenêtre à la hauteur de la colonne de réglages (réduite à l'écran si besoin), centrée.
 private struct AjusteFenetre: NSViewRepresentable {
-    let hauteur: CGFloat
     func makeNSView(context: Context) -> NSView { Probe() }
-    func updateNSView(_ v: NSView, context: Context) { (v as? Probe)?.hauteur = hauteur; (v as? Probe)?.appliquer() }
+    func updateNSView(_ v: NSView, context: Context) {}
 
     final class Probe: NSView {
-        var hauteur: CGFloat = 0
-        private var debut: Date?
-        private var derniere: CGFloat = 0
-        override func viewDidMoveToWindow() { if window != nil { debut = Date() }; appliquer() }
-        /// Suit la hauteur du contenu pendant les deux premières secondes (le texte se met en page en plusieurs passes).
-        func appliquer() {
-            guard hauteur > 60, hauteur != derniere, let w = window, let debut, Date().timeIntervalSince(debut) < 2 else { return }
-            derniere = hauteur
+        private var fait = false
+        override func viewDidMoveToWindow() {
+            guard !fait, let w = window else { return }
+            fait = true
             w.isRestorable = false
             for delai in [0.0, 0.3] {
-                DispatchQueue.main.asyncAfter(deadline: .now() + delai) { [weak w, hauteur] in
+                DispatchQueue.main.asyncAfter(deadline: .now() + delai) { [weak w] in
                     guard let w else { return }
                     let zone = (w.screen ?? NSScreen.main)?.visibleFrame.size ?? NSSize(width: 1440, height: 900)
-                    let barre = w.contentView.map { $0.frame.height - w.contentLayoutRect.height } ?? 0   // barre de titre superposée au contenu
-                    w.setContentSize(NSSize(width: 940, height: min(hauteur + barre, zone.height - 60)))
+                    w.setContentSize(NSSize(width: min(TailleFenetre.defaut.width, zone.width), height: min(TailleFenetre.defaut.height, zone.height - 40)))
                     w.socleCenter()
                 }
             }

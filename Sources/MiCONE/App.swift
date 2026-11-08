@@ -11,7 +11,7 @@ struct MiCONEApp: App {
                 .frame(minWidth: 940, minHeight: 560)
                 .splashGated()
         }
-        .defaultSize(width: 940, height: 760)
+        .defaultSize(width: TailleFenetre.defaut.width, height: TailleFenetre.defaut.height)
         .windowResizability(.contentMinSize)
         .commands {
             CommandGroup(replacing: .appInfo) {
