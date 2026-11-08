@@ -7,3 +7,5 @@ Icon
 .venv/
 outils/detourage
 Icon?
+.build/
+MiCONE.app/

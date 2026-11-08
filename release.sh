@@ -1,20 +1,24 @@
 #!/bin/bash
-# Publie la version de src/version.py : compile, signe Developer ID, notarise, agrafe, archive, crée la release GitHub vX.Y.Z.
-# L'appli installée se met à jour toute seule depuis cette release (src/maj.py). Usage : ./release.sh   (NOTES="…")
+# Publie une version : tests, compilation, notarisation (Developer ID), puis release GitHub avec MiCONE.zip et son .sha256,
+# que la mise à jour automatique de l'appli va chercher. Notes : _tools/changelogs/MiCONE_<version>.txt (4 langues).
+# Usage : ./release.sh <version>   (ex. 2.0.1 ; le tag devient v2.0.1 ; VERSION est mis à jour et commité avant)
 set -euo pipefail
 cd "$(dirname "$0")"
+VERSION="${1:?Usage : ./release.sh <version>}"
+NOTARIZE=/Volumes/SKYRIM/TOOLS/MAC/_tools/notarize_app.sh
+DIST="$(mktemp -d)"
 
-VERSION="$(sed -n 's/^__version__ = "\(.*\)"/\1/p' src/version.py)"
-TAG="v$VERSION"
-[ -z "$(git status --porcelain)" ] || { echo "Modifications non commitées : commitez d'abord." >&2; exit 1; }
-git rev-parse "$TAG" >/dev/null 2>&1 && { echo "$TAG existe déjà : changez la version dans src/version.py." >&2; exit 1; }
-
-WORK="$(mktemp -d)"
-MICONE_APPS_DIR="$WORK/build" ./build_app.sh
-DIST="$WORK/notarized" /Volumes/SKYRIM/TOOLS/MAC/_tools/notarize_app.sh "$WORK/build/MiCONE.app"
-ZIP="$WORK/MiCONE-$VERSION.zip"
-/usr/bin/ditto -c -k --keepParent "$WORK/notarized/MiCONE.app" "$ZIP"
+[ -z "$(git status --porcelain -- . ':!VERSION')" ] || { echo "Modifications non commitées : commitez d'abord." >&2; exit 1; }
+echo "$VERSION" > VERSION
+swift test
+VERSION="$VERSION" NO_INSTALL=1 ./build_app.sh
+DIST="$DIST" "$NOTARIZE" MiCONE.app
+# MiCONE-X.Y.Z.zip : nom attendu par les versions 1.x (Python), pour qu'elles se mettent à jour vers celle-ci
+cp "$DIST/MiCONE.zip" "$DIST/MiCONE-$VERSION.zip"
+(cd "$DIST" && shasum -a 256 MiCONE.zip > MiCONE.zip.sha256)
+python3 /Volumes/SKYRIM/TOOLS/MAC/_tools/release_notes.py MiCONE "$VERSION" --sha "$DIST/MiCONE.zip.sha256" -o "$DIST/notes.md"
+git add VERSION && { git diff --cached --quiet || git commit -m "Version $VERSION"; }
 git push origin main
-gh release create "$TAG" "$ZIP" --title "MiCONE $VERSION" --notes "${NOTES:-Version $VERSION}"
-rm -rf "$WORK"
-echo "OK : release $TAG publiée"
+gh release create "v$VERSION" "$DIST/MiCONE.zip" "$DIST/MiCONE.zip.sha256" "$DIST/MiCONE-$VERSION.zip" --title "MiCONE $VERSION" --notes-file "$DIST/notes.md"
+rm -rf "$DIST"
+echo "OK : release v$VERSION publiée"

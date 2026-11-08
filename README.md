@@ -9,7 +9,7 @@ MiCONE is made by Starbudweiser & Claude Code (Anthropic) and released under the
 ## Features
 
 - Image → `.ICNS`: application icon (squircle) or Finder-style folder icon with an engraved motif, with background, size, offset, glass and shadow controls.
-- Automatic background removal (numpy for icon plates, Apple Vision otherwise).
+- Automatic background removal (flood fill for icon plates, Apple Vision otherwise, all on your Mac).
 - "Apply to a folder…" sets the icon on a folder directly.
 - Optional AI generation (Pollinations, Hugging Face, Gemini, OpenAI). API keys are kept in the macOS Keychain, never in a file.
 - Command line: `MiCONE --cli image.png [more…] [--sortie DIR] [--fond sombre] [--taille 72] [--png]`.
@@ -18,20 +18,22 @@ MiCONE is made by Starbudweiser & Claude Code (Anthropic) and released under the
 
 ## Install
 
-Download `MiCONE-X.Y.Z.zip` from the [latest release](https://github.com/starbudweiser/MiCONE/releases/latest), unzip it and move `MiCONE.app` to your Applications folder. Signed with a Developer ID and notarized by Apple.
+Download `MiCONE.zip` from the [latest release](https://github.com/starbudweiser/MiCONE/releases/latest), unzip it and move `MiCONE.app` to your Applications folder. Signed with a Developer ID and notarized by Apple.
 
 ## Updates
 
-At launch (at most once a day) MiCONE checks the latest GitHub release. If a newer version exists it downloads the zip, verifies the bundle identifier, the version and the code signature (which must match the running app's signing requirement), then replaces itself and relaunches. If an image is loaded, the new version is installed when you quit instead. Turn it off with *MiCONE → Install updates automatically*; *Check for Updates…* in the same menu checks on demand.
+At launch (at most once a day) MiCONE checks the GitHub releases. If a newer version exists it shows its release notes, then downloads the zip, verifies the SHA-256, the bundle identifier, the version and the Developer ID signature, replaces itself and relaunches. Nothing is installed while an image is loaded. Turn it off with the gear button → *Install updates automatically*; *Check for Updates…* in the same menu (or the app menu) checks on demand.
 
 ## Build from source
 
+Swift / SwiftUI, macOS 14+, no dependency.
+
 ```bash
-python3 -m unittest discover tests   # tests
-./build_app.sh                        # PyInstaller build, signs and installs MiCONE.app
+swift test          # tests
+./build_app.sh      # builds, signs and installs MiCONE.app (NO_INSTALL=1 to only build)
 ```
 
-Requires Python 3.12, PyQt6, Pillow, numpy and PyInstaller. `build_app.sh` copies the Socle design-system module and signs with helper scripts specific to the author's machine; adjust the `SOCLE_QT` and `SIGN` lines for your setup. `release.sh` is the author's notarize-and-publish script.
+`build_app.sh` copies the Socle design-system and updater sources and signs with helper scripts specific to the author's machine; without them it falls back to an ad-hoc signature. `release.sh <version>` is the author's notarize-and-publish script.
 
 ## License
 
