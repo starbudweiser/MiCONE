@@ -1,5 +1,7 @@
 # MiCONE
 
+[![Listed on OpenMacApps](https://openmacapps.com/badge.svg)](https://openmacapps.com/apps/micone/)
+
 Turns any image into a macOS icon (`.ICNS`) set on the dark background of macOS 27 icons, so the system does not add a white plate behind transparent or non-square PNGs. Also makes Finder-style folder icons and can generate an icon with an AI service.
 
 ## About
