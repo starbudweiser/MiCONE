@@ -100,6 +100,7 @@
 "apropos_menu" = "Informazioni su MiCONE";
 "apropos_description" = "Trasforma qualsiasi immagine in un'icona macOS (.ICNS) sullo sfondo scuro delle icone di macOS 27.";
 "apropos_version" = "Versione %1$@ (%2$@)";
+"apropos_collection" = "Fa parte del DESKTOP MAC TOOLKIT";
 "apropos_auteurs" = "Starbudweiser & Claude Code (Anthropic)";
 "apropos_licence" = "Licenza MIT. © 2026 Starbudweiser.";
 "apropos_garantie" = "Software fornito «così com'è», senza garanzie di alcun tipo.";

@@ -52,6 +52,7 @@ enum About {
             icon,
             brandedName(),
             label(L("apropos_version", version, build), secondary: true),
+            label(L("apropos_collection"), secondary: true),
             label(L("apropos_description")),
             label(L("apropos_auteurs"), bold: true),
             label(L("apropos_licence")),
@@ -62,7 +63,7 @@ enum About {
         stack.alignment = .centerX
         stack.spacing = 12
         stack.setCustomSpacing(6, after: views[1])
-        stack.setCustomSpacing(18, after: views[2])
+        stack.setCustomSpacing(18, after: views[3])
         stack.edgeInsets = NSEdgeInsets(top: 28, left: sideMargin, bottom: 28, right: sideMargin)
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.widthAnchor.constraint(equalToConstant: textWidth + 2 * sideMargin).isActive = true
