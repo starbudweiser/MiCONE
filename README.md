@@ -12,6 +12,8 @@ Turns any image into a macOS icon (`.ICNS`) set on the dark background of macOS 
 
 MiCONE is made by Starbudweiser & Claude Code (Anthropic) and released under the MIT license (© 2026 Starbudweiser). It is provided "as is", without warranty of any kind. The same information is in the app: *MiCONE → About MiCONE*.
 
+MiCONE is part of the **DESKTOP MAC TOOLKIT**, Starbudweiser's collection of macOS apps.
+
 ## Features
 
 - Image → `.ICNS`: application icon (squircle) or Finder-style folder icon with an engraved motif, with background, size, offset, glass and shadow controls.
