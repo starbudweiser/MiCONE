@@ -6,6 +6,7 @@ struct MainView: View {
     @ObservedObject var m = Modele.shared
     @ObservedObject var maj = UpdateEngine.shared
     @AppStorage("autoUpdate") private var autoUpdate = true
+    @AppStorage("lancerIconiQ") private var lancerIconiQ = false
 
     var body: some View {
         VStack(spacing: Socle.M.space3) {
@@ -41,6 +42,7 @@ struct MainView: View {
                 Menu {
                     Button(L("upd.menu")) { UpdateEngine.shared.checkNow() }
                     Toggle(L("upd.auto"), isOn: $autoUpdate)
+                    Toggle(L("iconiq.lancer"), isOn: $lancerIconiQ)
                 } label: { BarGlyph(symbol: "gearshape") }
                     .menuStyle(.button).buttonStyle(.plain).menuIndicator(.hidden).fixedSize().help(L("reglages")).accessibilityLabel(L("reglages"))
             }

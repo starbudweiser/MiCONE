@@ -104,6 +104,7 @@
 "apropos_licence" = "Licencia MIT. © 2026 Starbudweiser.";
 "apropos_garantie" = "Software proporcionado «tal cual», sin garantía de ningún tipo.";
 "reglages" = "Ajustes";
+"iconiq.lancer" = "Abrir iCONIQ tras el envío";
 "upd.auto" = "Instalar las actualizaciones automáticamente";
 "upd.available" = "La versión %@ está disponible.";
 "upd.failed" = "La búsqueda de actualizaciones falló.";

@@ -162,7 +162,7 @@ final class Modele: ObservableObject {
             guard let motif = await motif() else { return }
             let ok = await Task.detached { () -> Bool in
                 do { try Rendu.ecrirePNG(Rendu.rendre(motif, reglages), fichier) } catch { return false }
-                return IconiQ.envoyer(nom: nomFinal, fichier: fichier, origine: origine, genre: genre, collection: choisie)
+                return IconiQ.envoyer(nom: nomFinal, fichier: fichier, origine: origine, genre: genre, collection: choisie, lancer: UserDefaults.standard.bool(forKey: "lancerIconiQ"))
             }.value
             if ok { dire(L("ok_iconiq"), .succes) } else { dire(L("erreur_iconiq"), .danger) }
         }
