@@ -14,6 +14,8 @@ MiCONE is made by Starbudweiser & Claude Code (Anthropic) and released under the
 
 MiCONE is part of the **DESKTOP MAC TOOLKIT**, Starbudweiser's collection of macOS apps.
 
+![The main window turning a sample star image into a dark macOS 27 icon, with the live preview and actual sizes.](docs/screenshot.png)
+
 ## Features
 
 - Image → `.ICNS`: application icon (squircle) or Finder-style folder icon with an engraved motif, with background, size, offset, glass and shadow controls.
