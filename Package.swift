@@ -4,6 +4,10 @@ import PackageDescription
 let package = Package(
     name: "MiCONE",
     platforms: [.macOS(.v14)],
+    products: [
+        // Moteur de rendu sans interface, lié par le serveur MCP d'iCONIQ.
+        .library(name: "MiCONECore", targets: ["MiCONECore"]),
+    ],
     targets: [
         .target(name: "MiCONECore", swiftSettings: [.swiftLanguageMode(.v5)], linkerSettings: [.linkedLibrary("sqlite3")]),
         .executableTarget(name: "MiCONE", dependencies: ["MiCONECore"], swiftSettings: [.swiftLanguageMode(.v5)]),

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Compile MiCONE.app (release), avec son icône, ses langues et la signature stable, et l'installe dans
-# ~/Applications/Applications Personnelles. Usage : ./build_app.sh   (NO_INSTALL=1 : ne pas installer ; VERSION=x.y.z)
+# ~/Applications/Applications Personnelles. Usage : ./build_app.sh   (NO_INSTALL=1 : ne pas installer ; VERSION=x.y.z ;
+# DEV=1 : édition de développement « MiCONE dev.app », bundle fr.stephan.micone.dev, données à part, laissée dans le dépôt)
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -16,7 +17,7 @@ BUILD="$(git rev-list --count HEAD 2>/dev/null || echo 1)"
 swift build -c release
 BIN="$(swift build -c release --show-bin-path)/MiCONE"
 
-APP=MiCONE.app
+if [ -n "${DEV:-}" ]; then APP="MiCONE dev.app"; BID=fr.stephan.micone.dev; NAME=MiCONE-dev; else APP=MiCONE.app; BID=fr.stephan.micone; NAME=MiCONE; fi
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/MiCONE"
@@ -27,9 +28,9 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleName</key><string>MiCONE</string>
-    <key>CFBundleDisplayName</key><string>MiCONE</string>
-    <key>CFBundleIdentifier</key><string>fr.stephan.micone</string>
+    <key>CFBundleName</key><string>$NAME</string>
+    <key>CFBundleDisplayName</key><string>$NAME</string>
+    <key>CFBundleIdentifier</key><string>$BID</string>
     <key>CFBundleExecutable</key><string>MiCONE</string>
     <key>CFBundleIconFile</key><string>MiCONE</string>
     <key>CFBundlePackageType</key><string>APPL</string>
@@ -52,6 +53,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 </dict>
 </plist>
 PLIST
+# Édition de dev : pas de mise à jour automatique (elle remplacerait le build par la version publiée).
+[ -n "${DEV:-}" ] && /usr/libexec/PlistBuddy -c "Add :LSEnvironment:SKYRIM_TOOLS_NO_UPDATE_CHECK string 1" "$APP/Contents/Info.plist"
 
 if [ -x "$TOOLS/MAC/_tools/sign_app.sh" ]; then
     "$TOOLS/MAC/_tools/sign_app.sh" "$APP"   # signature stable « sKYCRASH Local Signing »
@@ -59,7 +62,7 @@ else
     codesign --force --deep --sign - "$APP"   # signature ad hoc hors de ma machine
 fi
 
-if [ "${NO_INSTALL:-0}" != 1 ]; then
+if [ -z "${DEV:-}" ] && [ "${NO_INSTALL:-0}" != 1 ]; then
     mkdir -p "$DEST"
     osascript -e 'tell application id "fr.stephan.micone" to quit' 2>/dev/null || true
     rm -rf "$DEST/$APP"

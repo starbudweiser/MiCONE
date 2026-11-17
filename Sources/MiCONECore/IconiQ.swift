@@ -7,9 +7,11 @@ import SQLite3
 /// iCONIQ surveille ce dossier : il range l'icône dans sa collection « MiCONE », ou met à jour sur place celle déjà suivie
 /// pour la même origine. Si iCONIQ n'est pas lancé, il est démarré en arrière-plan, sans prendre le focus.
 public enum IconiQ {
-    public static let bundleID = "fr.stephan.iconiq"
+    /// Édition de développement de MiCONE (bundle `….dev`) : elle parle à l'édition de développement d'iCONIQ.
+    public static let dev = Bundle.main.bundleIdentifier?.hasSuffix(".dev") ?? false
+    public static let bundleID = dev ? "fr.stephan.iconiq.dev" : "fr.stephan.iconiq"
     public static let parDefaut = "MiCONE"   // collection où iCONIQ range les icônes quand aucune n'est choisie
-    public static var racine = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent("Library/Application Support/iCONIQ")
+    public static var racine = URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(dev ? "Library/Application Support/iCONIQ-dev" : "Library/Application Support/iCONIQ")
     static var boite: URL { racine.appendingPathComponent("Inbox") }
     static let applis = [NSHomeDirectory() + "/Applications/Applications Personnelles/iCONIQ.app", "/Applications/iCONIQ.app"]
 

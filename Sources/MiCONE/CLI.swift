@@ -3,10 +3,11 @@ import Foundation
 import MiCONECore
 
 /// Ligne de commande : MiCONE --cli image.png [autres…] [--sortie DOSSIER] [--fond sombre] [--couleur #rrggbb]
-///                     [--taille 72] [--remplir] [--sans-verre] [--dossier] [--png]
+///                     [--taille 72] [--remplir] [--sans-verre] [--dossier] [--fond-dossier nuit|#rrggbb]
+///                     [--grave | --sans-grave] [--detourer] [--appliquer DOSSIER] [--png]
 enum CLI {
     static func run(_ argv: [String]) -> Int32 {
-        var images: [String] = [], sortie: String?, r = Reglages(), png = false
+        var images: [String] = [], sortie: String?, r = Reglages(), png = false, appliquer: String?
         var i = 0
         func valeur() -> String? { i += 1; return i < argv.count ? argv[i] : nil }
         while i < argv.count {
@@ -18,13 +19,21 @@ enum CLI {
             case "--remplir": r.ajustement = "remplir"
             case "--sans-verre": r.verre = false
             case "--dossier": r.type = "dossier"
+            case "--fond-dossier":
+                r.type = "dossier"
+                if !Fabrique.couleurDossier(valeur() ?? "", dans: &r) { erreur("--fond-dossier : \(Fabrique.couleursDossier.joined(separator: "|"))|#rrggbb"); return 2 }
+            case "--grave": r.grave = true
+            case "--sans-grave": r.grave = false
+            case "--detourer": r.detourer = true
+            case "--appliquer": appliquer = valeur()
             case "--png": png = true
             case "--cli": break
             default: images.append(argv[i])
             }
             i += 1
         }
-        guard !images.isEmpty else { FileHandle.standardError.write("usage: MiCONE --cli image… [--sortie DOSSIER] [--fond sombre|graphite|nuit|clair|perso] [--couleur #rrggbb] [--taille 72] [--remplir] [--sans-verre] [--dossier] [--png]\n".data(using: .utf8)!); return 2 }
+        guard !images.isEmpty else { erreur("usage: MiCONE --cli image… [--sortie DOSSIER] [--fond sombre|graphite|nuit|clair|perso] [--couleur #rrggbb] [--taille 72] [--remplir] [--sans-verre] [--dossier] [--fond-dossier bleu|graphite|nuit|clair|#rrggbb] [--grave|--sans-grave] [--detourer] [--appliquer DOSSIER] [--png]"); return 2 }
+        if appliquer != nil && images.count != 1 { erreur("--appliquer : une seule image"); return 2 }
         var code: Int32 = 0
         for img in images {
             var dest = (img as NSString).deletingPathExtension + ".icns"
@@ -32,9 +41,14 @@ enum CLI {
                 try? FileManager.default.createDirectory(atPath: sortie, withIntermediateDirectories: true)
                 dest = (sortie as NSString).appendingPathComponent((dest as NSString).lastPathComponent)
             }
-            do { print(try Rendu.exporterICNS(Rendu.rendre(try ImageSource.charger(img), r), destination: dest, png: png)) }
-            catch { FileHandle.standardError.write("\(error.localizedDescription)\n".data(using: .utf8)!); code = 1 }
+            do {
+                let icone = try Fabrique.icone(img, r)
+                print(try Rendu.exporterICNS(icone, destination: dest, png: png))
+                if let appliquer { try MainActor.assumeIsolated { try Rendu.appliquerDossier(icone, appliquer) } }
+            } catch { erreur(error.localizedDescription); code = 1 }
         }
         return code
     }
+
+    private static func erreur(_ texte: String) { FileHandle.standardError.write("\(texte)\n".data(using: .utf8)!) }
 }
