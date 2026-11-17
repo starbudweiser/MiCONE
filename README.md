@@ -22,7 +22,8 @@ MiCONE is part of the **DESKTOP MAC TOOLKIT**, Starbudweiser's collection of mac
 - Automatic background removal (flood fill for icon plates, Apple Vision otherwise, all on your Mac).
 - "Apply to a folder…" sets the icon on a folder directly.
 - Optional AI generation (Pollinations, Hugging Face, Gemini, OpenAI). API keys are kept in the macOS Keychain, never in a file.
-- Command line: `MiCONE --cli image.png [more…] [--sortie DIR] [--fond sombre] [--taille 72] [--png]`.
+- Command line: `MiCONE --cli image.png [more…] [--sortie DIR] [--fond sombre] [--taille 72] [--png]`; folder icons with `--fond-dossier nuit|bleu|graphite|clair|#rrggbb`, `--grave` / `--sans-grave`, `--detourer` (remove the background) and `--appliquer FOLDER` (set the icon on a folder).
+- Its engine also powers iCONIQ's AI control: an AI agent can make app and folder icons through iCONIQ's MCP server.
 - English, French, Spanish and Italian (follows the system language, English otherwise).
 - Automatic updates from GitHub releases (see below).
 
@@ -62,6 +63,8 @@ MIT. See [LICENSE](LICENSE).
 ## Français
 
 Transforme n'importe quelle image en icône macOS (`.ICNS`) sur le fond sombre des icônes de macOS 27, pour que le système n'ajoute pas de plaque blanche derrière les PNG transparents ou non carrés. Crée aussi des icônes de dossier façon Finder et peut générer une icône avec un service d'IA (clés rangées dans le Trousseau).
+
+En ligne de commande, les icônes de dossier se règlent avec `--fond-dossier nuit|bleu|graphite|clair|#rrggbb`, `--grave` / `--sans-grave`, `--detourer` et `--appliquer DOSSIER` (pose l'icône sur un dossier). Son moteur sert aussi au pilotage par IA d'iCONIQ : un agent peut fabriquer icônes d'appli et de dossier par le serveur MCP d'iCONIQ.
 
 Installation : téléchargez la [dernière version notarisée](https://github.com/starbudweiser/MiCONE/releases/latest), décompressez-la et placez **MiCONE.app** dans Applications (macOS 14 Sonoma ou plus récent).
 
