@@ -18,3 +18,8 @@ Automatic background removal (`ia.detourer_auto`): icon plate → numpy magic wa
 
 ## Link with iCONIQ
 - `IconiQ.envoyer`: the "Send to iCONIQ" button drops the displayed icon (PNG, kind app/folder, origin = source image) into `~/Library/Application Support/iCONIQ/Inbox/` (file + `.json` descriptor; optional `collection` id chosen in the "Collection in iCONIQ" picker, read from iCONIQ's Library.db). iCONIQ files it in its "MiCONE" collection (a landing point), or updates in place the icon already linked to the same origin; it is started in the background if not running. Nothing is sent automatically.
+
+## Headless engine, dev edition
+- `Fabrique` (core): image → icon without UI (`couleurDossier` accepts a key or `#rrggbb`, background removal when `detourer`). Used by the CLI and by iCONIQ's MCP server, which links the `MiCONECore` library product.
+- CLI: `--fond-dossier nuit|bleu|graphite|clair|#rrggbb` (implies folder), `--grave` / `--sans-grave`, `--detourer`, `--appliquer DOSSIER` (one image).
+- Dev edition: `DEV=1 ./build_app.sh` → `MiCONE dev.app` (bundle `fr.stephan.micone.dev`, talks to `iCONIQ-dev`, no auto-update, not installed).
