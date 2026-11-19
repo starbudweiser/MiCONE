@@ -32,8 +32,8 @@ enum CLI {
             }
             i += 1
         }
-        guard !images.isEmpty else { erreur("usage: MiCONE --cli image… [--sortie DOSSIER] [--fond sombre|graphite|nuit|clair|perso] [--couleur #rrggbb] [--taille 72] [--remplir] [--sans-verre] [--dossier] [--fond-dossier bleu|graphite|nuit|clair|#rrggbb] [--grave|--sans-grave] [--detourer] [--appliquer DOSSIER] [--png]"); return 2 }
-        if appliquer != nil && images.count != 1 { erreur("--appliquer : une seule image"); return 2 }
+        guard !images.isEmpty else { erreur(L("cli_usage")); return 2 }
+        if appliquer != nil && images.count != 1 { erreur(L("cli_une_image")); return 2 }
         var code: Int32 = 0
         for img in images {
             var dest = (img as NSString).deletingPathExtension + ".icns"

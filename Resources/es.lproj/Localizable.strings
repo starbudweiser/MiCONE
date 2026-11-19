@@ -114,3 +114,5 @@
 "upd.title" = "Actualizaciones";
 "fond" = "Fondo";
 "couleur_dossier" = "Color de la carpeta";
+"cli_usage" = "uso: MiCONE --cli imagen… [--sortie CARPETA] [--fond sombre|graphite|nuit|clair|perso] [--couleur #rrggbb] [--taille 72] [--remplir] [--sans-verre] [--dossier] [--fond-dossier bleu|graphite|nuit|clair|#rrggbb] [--grave|--sans-grave] [--detourer] [--appliquer CARPETA] [--png]";
+"cli_une_image" = "--appliquer: una sola imagen";

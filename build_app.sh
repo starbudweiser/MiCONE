@@ -43,7 +43,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>NSPrincipalClass</key><string>NSApplication</string>
     <key>NSHighResolutionCapable</key><true/>
     <key>NSHumanReadableCopyright</key><string>© 2026 Starbudweiser</string>
-    <key>NSRemovableVolumesUsageDescription</key><string>MiCONE lit vos images et enregistre vos icônes sur vos disques externes.</string>
+    <key>NSRemovableVolumesUsageDescription</key><string>MiCONE reads your images and saves your icons on your external drives.</string>
     <key>CFBundleDocumentTypes</key><array><dict>
         <key>CFBundleTypeName</key><string>Image</string>
         <key>CFBundleTypeRole</key><string>Viewer</string>
